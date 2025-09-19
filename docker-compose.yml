@@ -1,0 +1,33 @@
+services:
+  usuario-service:
+    container_name: CentralControle-UsuarioServer
+    build:
+      context: ${URL_USUARIO_SERVICE}
+    environment:
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - USUARIO_DB_URL=${USUARIO_DB_URL}
+      - USUARIO_DB_USERNAME=${USUARIO_DB_USERNAME}
+      - USUARIO_DB_PASSWORD=${USUARIO_DB_PASSWORD}
+      - USUARIO_SCHEMA=${USUARIO_SCHEMA}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  web:
+    container_name: CentralControle-Web
+    build:
+      context: ${URL_WEB}
+    depends_on:
+      - usuario-service
+
+  nginx:
+    container_name: CentralControle-Nginx
+    image: nginx:latest
+    ports:
+      - "8081:80"
+    volumes:
+      - ${URL_NGINX_CONF}:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+      - usuario-service
